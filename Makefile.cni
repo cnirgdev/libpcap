@@ -1,0 +1,53 @@
+
+PCAP_VERSION := $(shell head -n1 VERSION)
+
+LIB := libpcap.so
+LIB += libpcap.a
+
+
+
+
+CMAKE_FLAGS := -DCMAKE_POSITION_INDEPENDENT_CODE=True
+#CMAKE_FLAGS += -DCMAKE_VERBOSE_MAKEFILE=y
+ifeq ($(PLATFORM), edge)
+	CMAKE_FLAGS += -DCMAKE_TOOLCHAIN_FILE=./cmake.edge
+else
+	PLATFORM=mcx
+endif
+
+all: intro $(LIB)
+
+intro:
+	@echo ""
+	@echo "==="
+	@echo "=== Building libpcap , version $(PCAP_VERSION)"
+	@echo "==="
+	@echo ""
+
+.PHONY: Makefile-mcx
+Makefile-mcx:
+	@echo "--- Makefile-mcx"
+	./configure
+
+
+.PHONY: Makefile-edge
+Makefile-edge:
+	@echo "--- Makefile-edge"
+	rm -rf CMakeFiles CMakeCache.txt
+	cmake . $(CMAKE_FLAGS)
+
+Makefile: Makefile-$(PLATFORM)
+
+$(LIB): Makefile
+	@echo "--- libpcap"
+	make -f Makefile
+
+CLEAN_DIRS  := CMakeFiles
+CLEAN_FILES := Makefile CMakeCache.txt cmake_install.cmake cmake_uninstall.cmake config.h pcap-filter.7 pcap-linktype.7 pcap-savefile.5 pcap-tstamp.7
+
+.PHONY: clean
+clean:
+	make clean || /bin/true
+	rm -rf $(LIB)
+	rm -rf $(CLEAN_DIRS)
+	rm -f $(CLEAN_FILES)
