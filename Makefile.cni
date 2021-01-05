@@ -27,7 +27,7 @@ intro:
 .PHONY: Makefile-mcx
 Makefile-mcx:
 	@echo "--- Makefile-mcx"
-	./configure
+	./configure --enable-dbus=no
 
 
 .PHONY: Makefile-edge
